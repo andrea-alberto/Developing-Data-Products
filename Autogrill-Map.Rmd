@@ -1,0 +1,29 @@
+---
+title: "Developing Data Products - Leaflet - Autogrill Italy Map"
+author: "Andrea Alberto"
+date: "22 December 2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# Autogrill Italy Map - 22 December 2017
+
+```{r echo=FALSE, warning=FALSE}
+
+library(leaflet)
+
+df <- read.csv('autogrill-italy.csv')
+AutogrillIcon <- makeIcon(
+    iconUrl='http://www.autogrill.com/sites/autogrill14corp/files/logo_2.jpg',
+    iconWidth = 30, iconHeight = 30
+)
+AutogrillNames <- df$Name
+AutogrillLatLong <- df[,2:3]
+
+AutogrillLatLong %>% 
+	leaflet(width = "100%") %>%
+    setView(lat = 41.89, lng = 12.51, zoom = 5) %>%
+	addTiles() %>%
+	addMarkers(icon=AutogrillIcon, popup=AutogrillNames, clusterOptions=markerClusterOptions())
+```
