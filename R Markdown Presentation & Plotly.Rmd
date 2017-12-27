@@ -1,0 +1,40 @@
+---
+title: "R Markdown Presentation & Plotly"
+author: Andrea Alberto
+date: 22/12/2017
+output: slidy_presentation
+---
+
+# Inhabitants per gender and city in Italy
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE, fig.align = 'center'}
+garbage <- capture.output(
+	library(plotly)
+)
+comuniZipFile <- "C:\\Users\\AALBERTO\\Downloads\\comuni.zip"
+#comuniZipFile <- "http://demo.istat.it/pop2017/dati/comuni.zip"
+comuniCsvFile <- "comuni.csv"
+comuniCon <- unz(comuniZipFile, comuniCsvFile)
+comuni <- read.table(comuniCon, header = TRUE, sep = ",", fileEncoding="latin1", skip = 1, quote="")
+comuniTot <- comuni[comuni$Età == 999,]
+comuniTot$Totale <- comuniTot$Totale.Femmine + comuniTot$Totale.Maschi
+
+gerarchiaComuniFile <- "C:\\Users\\AALBERTO\\Downloads\\Elenco-comuni-italiani.csv"
+#gerarchiaComuniFile <- "https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.csv"
+gerarchiaComuni <- read.table(gerarchiaComuniFile, header = TRUE, sep = ";", fileEncoding="latin1",quote="")
+gerarchiaComuni1 <- gerarchiaComuni[,names(gerarchiaComuni) %in% c("Codice.Comune.formato.alfanumerico","Denominazione.regione","Denominazione.Città")]
+
+
+comuniTot <- merge(comuniTot,gerarchiaComuni,by.x="Codice.Comune",by.y="Codice.Comune.formato.alfanumerico")
+
+comuniTot <- comuniTot[order(comuniTot$Totale,decreasing = TRUE),]
+garbage <- capture.output(
+	py <- plot_ly(comuniTot[1:30,], x = ~Totale.Maschi, y = ~Totale.Femmine, type = "scatter", mode="markers", color=~Denominazione.regione, text=~Nome.Comune)  %>%
+    add_text(textposition = "top right", showlegend = FALSE)  %>%
+    layout(
+        title="Italy Inhabitants",
+        yaxis = list(title = "Female"),
+        xaxis = list(title = "Male"))
+)
+py
+```
